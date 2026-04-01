@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 24 33% 97%;
+    --foreground: 210 28% 12%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 210 28% 12%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 28% 12%;
+ 
+    --primary: 8 89% 63%;
+    --primary-foreground: 0 0% 100%;
+ 
+    --secondary: 199 79% 43%;
+    --secondary-foreground: 0 0% 100%;
+ 
+    --muted: 28 27% 92%;
+    --muted-foreground: 215 14% 45%;
+ 
+    --accent: 24 55% 94%;
+    --accent-foreground: 210 28% 12%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 24 25% 86%;
+    --input: 24 25% 86%;
+    --ring: 8 89% 63%;
+ 
+    --radius: 1rem;
+  }
+ 
+  .dark {
+    --background: 212 35% 9%;
+    --foreground: 0 0% 98%;
+ 
+    --card: 213 31% 12%;
+    --card-foreground: 0 0% 98%;
+ 
+    --popover: 213 31% 12%;
+    --popover-foreground: 0 0% 98%;
+ 
+    --primary: 8 89% 63%;
+    --primary-foreground: 0 0% 100%;
+ 
+    --secondary: 199 79% 43%;
+    --secondary-foreground: 0 0% 100%;
+ 
+    --muted: 214 25% 18%;
+    --muted-foreground: 214 12% 68%;
+ 
+    --accent: 214 25% 18%;
+    --accent-foreground: 0 0% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+ 
+    --border: 214 25% 20%;
+    --input: 214 25% 20%;
+    --ring: 8 89% 63%;
+  }
+}
+ 
+@layer base {
+  html {
+    background:
+      radial-gradient(circle at top left, rgba(255, 136, 110, 0.12), transparent 28%),
+      radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 22%),
+      hsl(var(--background));
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-transparent text-foreground;
+    font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+  }
+}

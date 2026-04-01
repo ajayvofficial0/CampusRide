@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum VehicleType {
+  CAR
+  BIKE
+}
+
+enum RideStatus {
+  SCHEDULED
+  EN_ROUTE
+  COMPLETED
+  CANCELLED
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  role          Role      @default(STUDENT)
+  isVerified    Boolean   @default(false)
+  collegeIdUrl  String?
+  department    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  vehicles      Vehicle[]
+  ridesAsDriver Ride[]
+  bookings      Booking[]
+}
+
+model Vehicle {
+  id          String      @id @default(uuid())
+  ownerId     String
+  owner       User        @relation(fields: [ownerId], references: [id])
+  model       String
+  plateNumber String
+  type        VehicleType
+  capacity    Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  rides       Ride[]
+}
+
+model Ride {
+  id            String     @id @default(uuid())
+  driverId      String
+  driver        User       @relation(fields: [driverId], references: [id])
+  vehicleId     String
+  vehicle       Vehicle    @relation(fields: [vehicleId], references: [id])
+  origin        String
+  destination   String
+  departureTime DateTime
+  seatPrice     Float
+  status        RideStatus @default(SCHEDULED)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  bookings      Booking[]
+}
+
+model Booking {
+  id          String        @id @default(uuid())
+  rideId      String
+  ride        Ride          @relation(fields: [rideId], references: [id])
+  passengerId String
+  passenger   User          @relation(fields: [passengerId], references: [id])
+  status      BookingStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
