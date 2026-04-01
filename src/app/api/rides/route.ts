@@ -1,24 +1,11 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
-
-// Middleware helper to verify token (simplified for MVP)
-const getUserId = (req: Request) => {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) return null;
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-        return decoded.userId;
-    } catch {
-        return null;
-    }
-};
+import { ensureDemoDataset, getDemoUser } from '@/lib/demo-data';
 
 export async function GET(req: Request) {
     try {
+        await ensureDemoDataset();
+
         const rides = await prisma.ride.findMany({
             include: {
                 driver: {
@@ -36,16 +23,16 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const userId = getUserId(req);
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
+        const user = await getDemoUser();
         const { vehicleId, origin, destination, departureTime, seatPrice } = await req.json();
+
+        if (!vehicleId || !origin || !destination || !departureTime || !seatPrice) {
+            return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+        }
 
         const ride = await prisma.ride.create({
             data: {
-                driverId: userId,
+                driverId: user.id,
                 vehicleId,
                 origin,
                 destination,

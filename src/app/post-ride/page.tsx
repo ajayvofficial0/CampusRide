@@ -72,7 +72,7 @@ export default function PostRidePage() {
 
             if (res.ok) {
                 alert('Ride posted successfully!');
-                router.push('/journeys');
+                router.push('/my-journeys');
             } else {
                 const error = await res.json();
                 alert(error.error || 'Failed to post ride');

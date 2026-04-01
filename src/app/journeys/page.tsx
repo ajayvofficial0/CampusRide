@@ -1,11 +1,14 @@
 import prisma from '@/lib/prisma';
 import RideCard from '@/components/RideCard';
+import { ensureDemoDataset } from '@/lib/demo-data';
 import { Clock3, Filter, MapPinned } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 async function getRides() {
   try {
+    await ensureDemoDataset();
+
     return await prisma.ride.findMany({
       where: {
         status: 'SCHEDULED',

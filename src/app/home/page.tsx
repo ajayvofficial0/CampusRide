@@ -56,6 +56,10 @@ export default function HomePage() {
             <TimelineItem title="Last booking accepted" text="You joined Rahul's route from Marathahalli." />
             <TimelineItem title="Chat reminder" text="Whitefield Route group has 3 unread messages." />
           </div>
+          <Link href="/my-journeys" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+            Manage my posted rides
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
         <div className="rounded-[28px] border border-border/70 bg-card/90 p-5 shadow-[0_30px_80px_-45px_rgba(15,23,42,0.45)]">

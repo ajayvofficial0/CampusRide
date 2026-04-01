@@ -87,7 +87,7 @@ export default function RideCard({
         <div className="flex items-center gap-3">
           <span className="text-lg font-bold">Rs {price}</span>
           <Link
-            href={`/journeys?ride=${id}`}
+            href={`/journeys/${id}`}
             className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Book Seat

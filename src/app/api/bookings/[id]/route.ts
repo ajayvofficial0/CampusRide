@@ -1,26 +1,9 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
-
-const getUserId = (req: Request) => {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) return null;
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-        return decoded.userId;
-    } catch {
-        return null;
-    }
-};
+import { ensureDemoDataset, getDemoUser } from '@/lib/demo-data';
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-    const userId = getUserId(req);
-    if (!userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = await getDemoUser();
 
     const { id } = params;
     const { status } = await req.json(); // "APPROVED" or "REJECTED"
@@ -30,6 +13,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
 
     try {
+        await ensureDemoDataset();
+
         // 1. Fetch the booking to find the rideId
         const booking = await prisma.booking.findUnique({
             where: { id },
@@ -41,7 +26,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         }
 
         // 2. Verify that the current user is the DRIVER of the ride
-        if (booking.ride.driverId !== userId) {
+        if (booking.ride.driverId !== user.id) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 

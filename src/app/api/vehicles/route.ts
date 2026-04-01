@@ -1,30 +1,12 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
-
-const getUserId = (req: Request) => {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) return null;
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-        return decoded.userId;
-    } catch {
-        return null;
-    }
-};
+import { getDemoUser } from '@/lib/demo-data';
 
 export async function GET(req: Request) {
-    const userId = getUserId(req);
-    if (!userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     try {
+        const user = await getDemoUser();
         const vehicles = await prisma.vehicle.findMany({
-            where: { ownerId: userId },
+            where: { ownerId: user.id },
         });
         return NextResponse.json(vehicles);
     } catch (error) {
@@ -33,18 +15,18 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-    const userId = getUserId(req);
-    if (!userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     try {
+        const user = await getDemoUser();
         const body = await req.json();
         const { model, plateNumber, type, capacity } = body;
 
+        if (!model || !plateNumber || !type || !capacity) {
+            return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+        }
+
         const vehicle = await prisma.vehicle.create({
             data: {
-                ownerId: userId,
+                ownerId: user.id,
                 model,
                 plateNumber,
                 type, // Ensure this matches usage in frontend (CAR/BIKE)

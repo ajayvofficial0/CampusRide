@@ -1,29 +1,16 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
-
-const getUserId = (req: Request) => {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) return null;
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-        return decoded.userId;
-    } catch {
-        return null;
-    }
-};
+import { ensureDemoBooking, ensureDemoDataset, getDemoUser } from '@/lib/demo-data';
 
 export async function POST(req: Request) {
-    const userId = getUserId(req);
-    if (!userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     try {
+        await ensureDemoDataset();
+        const user = await getDemoUser();
         const { rideId } = await req.json();
+
+        if (!rideId) {
+            return NextResponse.json({ error: 'Ride id is required' }, { status: 400 });
+        }
 
         // Check if ride exists
         const ride = await prisma.ride.findUnique({
@@ -34,22 +21,20 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Ride not found' }, { status: 404 });
         }
 
+        if (ride.driverId === user.id) {
+            return NextResponse.json({ error: 'You cannot book your own ride' }, { status: 400 });
+        }
+
         // Check if already booked
         const existing = await prisma.booking.findFirst({
-            where: { rideId, passengerId: userId },
+            where: { rideId, passengerId: user.id },
         });
 
         if (existing) {
             return NextResponse.json({ error: 'Already booked' }, { status: 409 });
         }
 
-        const booking = await prisma.booking.create({
-            data: {
-                rideId,
-                passengerId: userId,
-                status: 'PENDING',
-            },
-        });
+        const booking = await ensureDemoBooking(rideId, user.id);
 
         return NextResponse.json(booking, { status: 201 });
     } catch (error) {
